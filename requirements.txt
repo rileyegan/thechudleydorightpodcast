@@ -1,0 +1,2 @@
+# No pip packages required — install_podcast_stack.py uses the Python standard library only.
+# System apps (OBS, Resolve, etc.) are installed via brew / winget / flatpak / apt.

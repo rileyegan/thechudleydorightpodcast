@@ -1,0 +1,16 @@
+# Local installer status (machine-specific)
+setup-status.json
+
+# Python bytecode
+__pycache__/
+*.py[cod]
+
+# OS / editor noise
+.DS_Store
+Thumbs.db
+*.swp
+.idea/
+.vscode/
+
+# Nested publish attempt
+# (keep if you intentionally ran publish_github_repo.py inside this folder)
