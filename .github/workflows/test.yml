@@ -1,0 +1,44 @@
+name: tests
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  pytest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install test deps
+        run: python3 -m pip install -r requirements-dev.txt
+      - name: Run tests
+        run: python3 -m pytest
+
+  version:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Check VERSION and CHANGELOG
+        if: github.event_name == 'pull_request'
+        run: python3 repo_checks.py version --base "${{ github.event.pull_request.base.sha }}"
+      - name: Check VERSION and CHANGELOG
+        if: github.event_name != 'pull_request'
+        run: python3 repo_checks.py version
+
+  pii:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Check tracked files for PII
+        run: python3 repo_checks.py pii
