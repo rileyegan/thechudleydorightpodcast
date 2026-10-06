@@ -9,6 +9,8 @@
 # webbrowser  Opens URLs. Here: VDO.Ninja, Resolve download, plugin pages.
 # pathlib   Path helpers. Here: plugin folders and status checks.
 # urllib.request  Downloads files. Here: Source Record plugin when possible.
+# pip       Python package installer. Here: pypdf/openpyxl/python-docx into vendor/.
+# ffmpeg    Media converter. Here: brew/apt/winget install for tools/convert_audio.py.
 # =============================================================================
 """
 Install and verify the free three-stream podcast stack:
@@ -18,6 +20,8 @@ Install and verify the free three-stream podcast stack:
   - OBS Source Record plugin (one file per person)
   - DaVinci Resolve free (edit / sync) — download page only; Blackmagic
     requires a free account, so silent install is not reliable
+  - pypdf / openpyxl / python-docx into ./vendor (PDF, Word, Excel helpers)
+  - ffmpeg (audio extract/convert for publishing)
 
 Run:
   python3 install_podcast_stack.py
@@ -58,6 +62,14 @@ HEADPHONES_REMINDER = (
     "Everyone needs headphones (wired preferred) so speakers do not bleed "
     "into mics. Separate tracks will not fix echo."
 )
+REPO_ROOT = Path(__file__).resolve().parent
+VENDOR_DIR = REPO_ROOT / "vendor"
+REQUIREMENTS_FILE = REPO_ROOT / "requirements.txt"
+PYTHON_MEDIA_MODULES = (
+    ("pypdf", "pypdf"),
+    ("openpyxl", "openpyxl"),
+    ("docx", "python-docx"),
+)
 
 
 @dataclass
@@ -94,6 +106,8 @@ class Report:
         print("  4. Enable Source Record on each source (separate files).")
         print("  5. Clap once on camera for sync, then record ~1 hour.")
         print("  6. Sync/edit the three files in DaVinci Resolve.")
+        print("  7. Optional live audience: fill in live-stream/destination.json.")
+        print("  8. Optional: tools/ for PDF/DOCX/XLSX and ffmpeg audio convert.")
 
 
 def which(cmd: str) -> Optional[str]:
@@ -396,6 +410,155 @@ def setup_vdo_ninja(*, skip_browser: bool) -> StepResult:
     )
 
 
+def with_vendor_path() -> None:
+    """Prefer ./vendor the same way datastuff scripts do."""
+    if VENDOR_DIR.is_dir():
+        rendered = str(VENDOR_DIR)
+        if rendered not in sys.path:
+            sys.path.insert(0, rendered)
+
+
+def python_media_module_status() -> dict[str, bool]:
+    with_vendor_path()
+    found: dict[str, bool] = {}
+    for module_name, _pip_name in PYTHON_MEDIA_MODULES:
+        try:
+            __import__(module_name)
+            found[module_name] = True
+        except ImportError:
+            found[module_name] = False
+    return found
+
+
+def python_media_tools_installed() -> bool:
+    return all(python_media_module_status().values())
+
+
+def python_media_tools_detail() -> str:
+    status = python_media_module_status()
+    present = [pip for module, pip in PYTHON_MEDIA_MODULES if status.get(module)]
+    missing = [pip for module, pip in PYTHON_MEDIA_MODULES if not status.get(module)]
+    if not missing:
+        return "pypdf, openpyxl, python-docx"
+    if present:
+        return "missing " + ", ".join(missing)
+    return "Not installed"
+
+
+def install_python_media_tools() -> StepResult:
+    """Install pypdf / openpyxl / python-docx into vendor/ (datastuff pattern)."""
+    if python_media_tools_installed():
+        return StepResult("Python document tools", True, python_media_tools_detail())
+
+    print("\nInstalling pypdf, openpyxl, python-docx into vendor/…")
+    VENDOR_DIR.mkdir(parents=True, exist_ok=True)
+    proc = run(
+        [
+            sys.executable,
+            "-m",
+            "pip",
+            "install",
+            "-r",
+            str(REQUIREMENTS_FILE),
+            "-t",
+            str(VENDOR_DIR),
+        ],
+        capture=False,
+    )
+    if proc.returncode == 0 and python_media_tools_installed():
+        return StepResult(
+            "Python document tools",
+            True,
+            "Installed into vendor/",
+        )
+    return StepResult(
+        "Python document tools",
+        False,
+        python_media_tools_detail(),
+        "python3 -m pip install -r requirements.txt -t vendor",
+    )
+
+
+def ffmpeg_installed() -> bool:
+    return bool(which("ffmpeg"))
+
+
+def install_ffmpeg() -> StepResult:
+    """Install ffmpeg for tools/convert_audio.py (same binary the SoundCloud helper used)."""
+    if ffmpeg_installed():
+        return StepResult("ffmpeg", True, "Already installed")
+
+    os_id = detect_os()
+    print("\nInstalling ffmpeg…")
+    try:
+        if os_id == "macos":
+            if not which("brew"):
+                return StepResult(
+                    "ffmpeg",
+                    False,
+                    "Homebrew not found",
+                    "Install Homebrew from https://brew.sh then: brew install ffmpeg",
+                )
+            proc = run(["brew", "install", "ffmpeg"], capture=False)
+            if proc.returncode == 0 or ffmpeg_installed():
+                return StepResult("ffmpeg", True, "Installed via Homebrew")
+            return StepResult(
+                "ffmpeg",
+                False,
+                "brew install failed",
+                "brew install ffmpeg",
+            )
+        if os_id == "windows":
+            if not which("winget"):
+                return StepResult(
+                    "ffmpeg",
+                    False,
+                    "winget not found",
+                    "Install ffmpeg from https://ffmpeg.org/download.html",
+                )
+            proc = run(
+                [
+                    "winget",
+                    "install",
+                    "--id",
+                    "Gyan.FFmpeg",
+                    "-e",
+                    "--accept-package-agreements",
+                    "--accept-source-agreements",
+                ],
+                capture=False,
+            )
+            if proc.returncode == 0 or ffmpeg_installed():
+                return StepResult("ffmpeg", True, "Installed via winget")
+            return StepResult(
+                "ffmpeg",
+                False,
+                "winget install failed",
+                "Install ffmpeg from https://ffmpeg.org/download.html",
+            )
+        if os_id == "linux":
+            if which("apt-get"):
+                run(["sudo", "apt-get", "update"], capture=False)
+                run(["sudo", "apt-get", "install", "-y", "ffmpeg"], capture=False)
+                if ffmpeg_installed():
+                    return StepResult("ffmpeg", True, "Installed via apt")
+            return StepResult(
+                "ffmpeg",
+                False,
+                "No automatic installer succeeded",
+                "sudo apt install ffmpeg",
+            )
+    except FileNotFoundError as exc:
+        return StepResult("ffmpeg", False, f"Missing tool: {exc}", "Install ffmpeg")
+
+    return StepResult(
+        "ffmpeg",
+        False,
+        f"Unsupported OS: {platform.system()}",
+        "Install ffmpeg from https://ffmpeg.org/download.html",
+    )
+
+
 def setup_discord_optional(*, skip_browser: bool) -> StepResult:
     """Optional backup talk track if VDO.Ninja has issues."""
     print("\nOptional: Discord as a backup call (not the primary recorder).")
@@ -529,11 +692,31 @@ def main(argv: Optional[list[str]] = None) -> int:
                 "Browser app — visit https://vdo.ninja when recording",
             )
         )
+        report.add(
+            StepResult(
+                "Python document tools",
+                python_media_tools_installed(),
+                python_media_tools_detail(),
+                None
+                if python_media_tools_installed()
+                else "python3 -m pip install -r requirements.txt -t vendor",
+            )
+        )
+        report.add(
+            StepResult(
+                "ffmpeg",
+                ffmpeg_installed(),
+                "Found" if ffmpeg_installed() else "Not found",
+                None if ffmpeg_installed() else "brew install ffmpeg",
+            )
+        )
     else:
         report.add(install_obs())
         report.add(install_source_record(skip_browser=args.skip_browser))
         report.add(setup_resolve(skip_browser=args.skip_browser))
         report.add(setup_vdo_ninja(skip_browser=args.skip_browser))
+        report.add(install_python_media_tools())
+        report.add(install_ffmpeg())
         if not args.skip_optional:
             report.add(setup_discord_optional(skip_browser=args.skip_browser))
 

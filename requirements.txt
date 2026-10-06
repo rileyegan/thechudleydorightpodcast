@@ -1,2 +1,5 @@
-# No pip packages required — install_podcast_stack.py uses the Python standard library only.
-# System apps (OBS, Resolve, etc.) are installed via brew / winget / flatpak / apt.
+# Document/audio helpers (ported from datastuff). Installer puts these in ./vendor.
+# System apps (OBS, Resolve, ffmpeg) are installed via brew / winget / flatpak / apt.
+pypdf>=4.0.0
+openpyxl>=3.1.0
+python-docx>=1.1.0

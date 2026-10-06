@@ -1,6 +1,17 @@
 # Local installer status (machine-specific)
 setup-status.json
 
+# Live-stream secrets / filled-in destination (copy from examples)
+.env
+live-stream/.env
+live-stream/destination.json
+
+# Vendored pip packages for tools/ (pypdf, openpyxl, python-docx)
+vendor/
+
+# Zipped Mac package for Bobby (rebuild with mac-setup/pack-for-bobby.sh)
+dist/
+
 # Python bytecode
 __pycache__/
 *.py[cod]

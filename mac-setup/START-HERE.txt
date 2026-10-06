@@ -1,0 +1,27 @@
+The Chudley Do Right Podcast — Mac setup
+=======================================
+
+1. Keep this whole folder together (do not pick out a single file).
+
+2. Open Terminal (Spotlight: Terminal) and paste these three lines,
+   then press Return. Change Downloads to Desktop if that is where
+   you unzipped:
+
+     cd ~/Downloads/ChudleyDoRight-MacSetup
+     chmod +x mac-setup/install-mac.sh
+     ./mac-setup/install-mac.sh
+
+   Homebrew may ask for your Mac password. That is expected.
+   Source Record and DaVinci Resolve still need a click on the
+   pages the installer opens (Resolve wants a free Blackmagic account).
+
+3. Headphones on. On show day, join as Bobby:
+
+     https://vdo.ninja/?room=thechudleydorightpodcast&push=bobby&label=Bobby
+
+If macOS says the installer is from an unidentified developer, either
+right-click mac-setup/install.command → Open, or run:
+
+     xattr -cr ~/Downloads/ChudleyDoRight-MacSetup
+
+More detail: mac-setup/README.md

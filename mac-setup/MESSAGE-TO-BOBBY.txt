@@ -1,0 +1,6 @@
+Hey Bobby — here's the Mac installer for The Chudley Do Right Podcast.
+
+Unzip ChudleyDoRight-MacSetup.zip, open START-HERE.txt, and run the three Terminal lines in there. It installs OBS, ffmpeg, and the Python helpers. Source Record (OBS plugin) and DaVinci Resolve still need a click on the pages it opens. Wear headphones.
+
+Show-day join link (I'll have the director room open first):
+https://vdo.ninja/?room=thechudleydorightpodcast&push=bobby&label=Bobby
