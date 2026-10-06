@@ -1,0 +1,54 @@
+{
+  "status": "unconfigured",
+  "website": {
+    "which": "undecided",
+    "candidates": {
+      "riley": "",
+      "bobby": ""
+    },
+    "url": "",
+    "page_path": "/live"
+  },
+  "ingest": {
+    "platform": "undecided",
+    "obs_service": "",
+    "server": "",
+    "stream_key_env": "CHUDLEY_STREAM_KEY",
+    "width": 1920,
+    "height": 1080,
+    "fps": 30,
+    "video_bitrate_kbps": 4500,
+    "audio_bitrate_kbps": 160,
+    "encoder_hint": "Apple VT H264 Hardware Encoder on Mac"
+  },
+  "player": {
+    "watch_url": "",
+    "embed_src": "",
+    "twitch_parent_host": ""
+  },
+  "recipes": {
+    "youtube": {
+      "platform": "youtube",
+      "obs_service": "YouTube - RTMPS",
+      "server": "",
+      "watch_url": "https://youtube.com/live/LIVE_VIDEO_ID",
+      "embed_src": "https://www.youtube.com/embed/LIVE_VIDEO_ID?autoplay=1",
+      "channel_embed_src": "https://www.youtube.com/embed/live_stream?channel=CHANNEL_ID"
+    },
+    "twitch": {
+      "platform": "twitch",
+      "obs_service": "Twitch",
+      "server": "",
+      "watch_url": "https://www.twitch.tv/CHANNEL",
+      "embed_src": "https://player.twitch.tv/?channel=CHANNEL&parent=YOUR_SITE_DOMAIN",
+      "twitch_parent_host": "YOUR_SITE_DOMAIN"
+    },
+    "custom_rtmp": {
+      "platform": "custom_rtmp",
+      "obs_service": "Custom",
+      "server": "rtmp://YOUR_INGEST_HOST/live",
+      "watch_url": "https://YOUR_SITE/live",
+      "embed_src": "https://YOUR_PLAYER_EMBED_URL"
+    }
+  }
+}

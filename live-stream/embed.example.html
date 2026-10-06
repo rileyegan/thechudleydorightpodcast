@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>The Chudley Do Right Podcast — Live</title>
+    <style>
+      :root {
+        color-scheme: dark;
+      }
+      body {
+        margin: 0;
+        font-family: system-ui, sans-serif;
+        background: #111;
+        color: #eee;
+      }
+      .wrap {
+        max-width: 960px;
+        margin: 0 auto;
+        padding: 24px;
+      }
+      h1 {
+        font-size: 1.4rem;
+        font-weight: 650;
+        margin: 0 0 16px;
+      }
+      .player {
+        position: relative;
+        width: 100%;
+        aspect-ratio: 16 / 9;
+        background: #000;
+        border-radius: 8px;
+        overflow: hidden;
+      }
+      .player iframe {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        border: 0;
+      }
+      .placeholder {
+        position: absolute;
+        inset: 0;
+        display: grid;
+        place-items: center;
+        padding: 24px;
+        text-align: center;
+        color: #bbb;
+      }
+      .watch {
+        margin-top: 12px;
+      }
+      a {
+        color: #8ec8ff;
+      }
+    </style>
+  </head>
+  <body>
+    <!--
+      Drop this file on Riley's or Bobby's site (for example /live), or copy
+      .player into an existing page.
+
+      Fill CHUDLEY_LIVE from live-stream/destination.json once you pick a host:
+
+        youtube:     https://www.youtube.com/embed/LIVE_VIDEO_ID?autoplay=1
+                     or https://www.youtube.com/embed/live_stream?channel=CHANNEL_ID
+        twitch:      https://player.twitch.tv/?channel=CHANNEL&parent=YOUR_SITE_DOMAIN
+        custom_rtmp: the player URL your ingest host gives you
+    -->
+    <script>
+      window.CHUDLEY_LIVE = {
+        title: "The Chudley Do Right Podcast",
+        embedSrc: "",
+        watchUrl: "",
+        offlineMessage: "We're not live right now. The player will appear here at showtime.",
+      };
+    </script>
+    <main class="wrap">
+      <h1 id="title">The Chudley Do Right Podcast</h1>
+      <div class="player" id="player"></div>
+      <p class="watch" id="watch" hidden>
+        <a id="watch-link" href="#">Watch on the host site</a>
+      </p>
+    </main>
+    <script>
+      (function () {
+        var cfg = window.CHUDLEY_LIVE || {};
+        var title = document.getElementById("title");
+        var player = document.getElementById("player");
+        var watch = document.getElementById("watch");
+        var watchLink = document.getElementById("watch-link");
+        if (cfg.title) {
+          title.textContent = cfg.title;
+          document.title = cfg.title + " — Live";
+        }
+        if (cfg.embedSrc) {
+          var iframe = document.createElement("iframe");
+          iframe.src = cfg.embedSrc;
+          iframe.allow =
+            "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share";
+          iframe.allowFullscreen = true;
+          iframe.title = cfg.title || "Live stream";
+          player.appendChild(iframe);
+        } else {
+          var placeholder = document.createElement("div");
+          placeholder.className = "placeholder";
+          placeholder.textContent =
+            cfg.offlineMessage || "Live player is not configured yet.";
+          player.appendChild(placeholder);
+        }
+        if (cfg.watchUrl) {
+          watch.hidden = false;
+          watchLink.href = cfg.watchUrl;
+        }
+      })();
+    </script>
+  </body>
+</html>

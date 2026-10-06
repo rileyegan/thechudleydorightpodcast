@@ -19,6 +19,8 @@ dedicated video feed and audio level in OBS.
 | [Source Record](https://obsproject.com/forum/resources/source-record.1285/) | One file (video+audio) per person | Free |
 | [DaVinci Resolve](https://www.blackmagicdesign.com/products/davinciresolve) | Sync, edit, export | Free tier |
 | Discord (optional) | Backup talk track only | Free |
+| pypdf / openpyxl / python-docx | PDF, Excel, Word helpers in `tools/` | Free |
+| [ffmpeg](https://ffmpeg.org) | Convert/extract audio for publishing | Free |
 
 ## Quick start
 
@@ -47,6 +49,19 @@ Check-only mode (no installs, no browser):
 python3 install_podcast_stack.py --check-only
 ```
 
+## Mac package for Bobby
+
+A zip Bobby can unzip and run in Terminal (or double-click `install.command`):
+
+```bash
+# Rebuild the zip (writes dist/ and copies to Desktop when possible).
+chmod +x mac-setup/pack-for-bobby.sh
+./mac-setup/pack-for-bobby.sh
+```
+
+Bobby's steps are in `mac-setup/START-HERE.txt`. A sendable blurb is
+`mac-setup/MESSAGE-TO-BOBBY.txt`.
+
 ## Session flow
 
 1. One host is **director** in OBS.
@@ -56,6 +71,35 @@ python3 install_podcast_stack.py --check-only
 5. Turn on **Source Record** for each source so you get three separate files.
 6. Everyone wears headphones. Clap once on camera for sync.
 7. Record the hour. Later, sync the three clips in DaVinci Resolve.
+
+## Live stream (optional)
+
+Public viewers are not on VDO.Ninja. OBS can send the same mixed program to
+YouTube, Twitch, or a custom RTMP host, then either website embeds that
+player. The destination is still unchosen — fill in the blanks later:
+
+- Playbook: [`live-stream/README.md`](live-stream/README.md)
+- Copy [`live-stream/destination.example.json`](live-stream/destination.example.json)
+  to `live-stream/destination.json` (gitignored) once you pick Riley's site
+  or Bobby's, plus an ingest host
+- Drop [`live-stream/embed.example.html`](live-stream/embed.example.html) on
+  that site
+- `python3 live-stream/check_destination.py` reports what is still blank
+
+You can record and stream at the same time. Keep Source Record running even
+when live, so the edit in Resolve is unchanged.
+
+## Document and audio helpers (from datastuff)
+
+PDF / Word / Excel readers and ffmpeg convert — without the bank, job, or
+rebate pipelines. Details: [`tools/README.md`](tools/README.md).
+
+```bash
+python3 -m pip install -r requirements.txt -t vendor
+python3 tools/check_tools.py --self-test
+python3 tools/pdf_text.py guest-bio.pdf
+python3 tools/convert_audio.py mix.mkv -o episode.mp3
+```
 
 ## Publish this folder as its own GitHub repo
 
